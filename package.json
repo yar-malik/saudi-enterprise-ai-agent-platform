@@ -3,22 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Give each department an AI assistant that completes real work in SAP, Oracle and ServiceNow \u2014 running inside your own infrastructure.",
+  "description": "Give each department an AI assistant that completes real work in SAP, Oracle and ServiceNow — running inside your own infrastructure.",
+  "engines": { "node": ">=18" },
   "scripts": {
-    "start": "node examples/node/index.mjs",
-    "stream": "node examples/node/stream.mjs"
+    "start": "node examples/node/index.mjs"
   },
-  "keywords": [
-    "saudi-arabia",
-    "arabic",
-    "ai-agents",
-    "enterprise-ai",
-    "sap",
-    "servicenow",
-    "sovereign-ai",
-    "on-premise",
-    "data-residency",
-    "tool-calling"
-  ],
   "license": "MIT"
 }
