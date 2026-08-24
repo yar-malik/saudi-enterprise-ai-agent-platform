@@ -22,7 +22,7 @@ every action it takes.
 
 You do not have to clone anything to see whether this works for you. The same
 engine this repository calls is running at **[app.voho.ai/private-enterprise-ai](https://app.voho.ai/private-enterprise-ai)** —
-Run the boundary check on a record, in the browser, in about a minute.
+run the boundary check on a record, in the browser, in about a minute.
 
 New accounts start with **$25 of credit**, and one balance and one API key
 cover every Voho product: Private Enterprise AI, and the five beside it.
