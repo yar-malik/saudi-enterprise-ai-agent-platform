@@ -1,41 +1,54 @@
-"""
-Saudi Enterprise AI Agent Platform — minimal Python example.
+"""See what would be stripped before anything left your estate.
 
-Speaks Najdi Saudi Arabic through the Voho speech API and writes an MP3.
-"""
+Standard library only — Python 3.9 or newer.
 
+    export VOHO_API_KEY=voho_sk_live_...   # app.voho.ai -> API Tokens
+    python examples/python/main.py
+
+New accounts start with $25 of credit, so this costs nothing to try.
+"""
+import base64
+import json
 import os
 import sys
-
-import requests
+import urllib.error
+import urllib.request
 
 KEY = os.environ.get("VOHO_API_KEY")
 BASE = os.environ.get("VOHO_BASE_URL", "https://app.voho.ai")
 
 if not KEY:
-    sys.exit("Set VOHO_API_KEY first — see .env.example")
+    sys.exit("Set VOHO_API_KEY first — create one at https://app.voho.ai/tokens")
 
-# Layla is a Najdi voice. faisal, nouf and omar are Najdi as well.
-payload = {
-    "text": "أهلاً بك في فوهو، كيف أقدر أساعدك اليوم؟",
-    "voice": "layla",
-    "model": "sada-1",
-    # Use "mulaw" for telephony — 8 kHz, no transcoding needed.
-    "format": "mp3",
-}
 
-res = requests.post(
-    f"{BASE}/v1/speech",
-    headers={"Authorization": f"Bearer {KEY}"},
-    json=payload,
-    timeout=30,
-)
+def voho(path, body, raw=False):
+    req = urllib.request.Request(
+        BASE + path,
+        data=json.dumps(body).encode(),
+        headers={"Authorization": "Bearer " + KEY, "Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(req) as res:
+            return res.read() if raw else json.load(res)
+    except urllib.error.HTTPError as err:
+        detail = json.loads(err.read() or b"{}").get("error", {})
+        sys.exit("%s: %s" % (detail.get("code", err.code), detail.get("message", "request failed")))
 
-if not res.ok:
-    sys.exit(f"Request failed: {res.status_code} {res.text[:200]}")
 
-with open("output.mp3", "wb") as fh:
-    fh.write(res.content)
+def spent(cents):
+    print("\nCharged $%.2f from your Voho balance." % (cents / 100))
 
-print("Wrote output.mp3")
-print("Characters billed:", res.headers.get("x-voho-characters"))
+record = " ".join(sys.argv[1:]) or """تذكرة دعم رقم 4471
+العميل: عبدالله بن سعد القحطاني، هوية وطنية 1082345671
+جوال: 0555 123 456 — البريد: a.alqahtani@example.com
+الآيبان: SA44 2000 0001 2345 6789 1234
+الملاحظة: بطاقته المنتهية 4242 رُفضت، ويطلب استرجاع 3,450 ريال."""
+
+print("Checking what would leave the estate…\n")
+out = voho("/v1/privacy/redact", {"text": record})
+
+print(out["verdict"], "\n")
+print(out["redacted"], "\n")
+for f in out["findings"]:
+    print("%-7s%s — %s" % (f["action"], f["kind"], f["why"]))
+spent(out["cost_cents"])
